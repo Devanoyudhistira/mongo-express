@@ -5,12 +5,17 @@ import { MongoClient,ServerApiVersion } from "mongodb";
 let db;
 const mongourl = process.env.mongourl;
 const documents = process.env.documents;
-const client = new MongoClient(mongourl);
+const client = new MongoClient(mongourl,{
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 
 const connection = async () => {
   try {
     await client.connect();
-    db = client.db(documents);
     console.log("connected success");
   } catch (error) {
     console.log(error + "failed");
@@ -21,7 +26,7 @@ connection()
 
 router.get("/:target", (async (req,res) => {
     const {target} = req.params
-    const collection = db.collection("blog")
+    const collection = client.db(documents).collection("blog");
     const finddocument = await collection.find({"contents.blog":{$regex:target, $options: 'i' }}).toArray()
     res.status(201).send(finddocument)
 }))

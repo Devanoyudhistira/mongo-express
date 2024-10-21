@@ -1,36 +1,40 @@
 import express from "express";
-const router = express.Router()
-import "dotenv/config"
-import { MongoClient } from "mongodb"
-let db
-const mongourl = process.env.mongourl;
-const documents = process.env.documents
-const client = new MongoClient(mongourl)
+const router = express.Router();
+import "dotenv/config";
+import { MongoClient, ServerApiVersion } from "mongodb";
+const uri = process.env.mongourl;
+const documents = process.env.documents;
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 
 const connection = async () => {
    try {
-    await client.connect()
-    db = client.db(documents)
-    console.log("connected success")
+    await client.connect();
+    client.db(documents).command({ ping: 1 });
+    console.log("connected success");
    } catch (error) {
-    console.log(error + "failed")
+    console.log(error + "failed");
    }
-}
-connection()
+};
+connection();
 
-const getdata = async (req,res,next) => {
-    const collection = db.collection("blog");
-    try {
-        const documents = await collection.find().toArray();
-        req.blogdata = documents
-        next()
+const getdata = async (req, res, next) => {
+  try {
+    const collection = client.db(documents).collection("blog");
+    const result = await collection.find().toArray();
+    req.blogdata = result;
+    next();
     } catch (error) {
-       console.log(error) 
-    }
-    
+    console.log(error);
 }
+};
 
-router.use(getdata)
+router.use(getdata);
 
-router.get("/",(req,res) => res.json(req.blogdata))
-export default router
+router.get("/", (req, res) => res.json(req.blogdata));
+export default router;

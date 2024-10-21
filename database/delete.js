@@ -1,16 +1,22 @@
 import express from "express";
 const router = express.Router();
 import "dotenv/config";
-import { MongoClient,ObjectId } from "mongodb";
+import { MongoClient,ObjectId,ServerApiVersion } from "mongodb";
 let db;
 const mongourl = process.env.mongourl;
 const documents = process.env.documents;
-const client = new MongoClient(mongourl);
+const client = new MongoClient(mongourl,{
+  serverApi:{
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 
 const connection = async () => {
   try {
     await client.connect();
-    db = client.db(documents);
+    client.db(documents).command({ping:1});
     console.log("connected success");
   } catch (error) {
     console.log(error + "failed");
@@ -19,8 +25,9 @@ const connection = async () => {
 connection();
 
 const deleteblog = async (req, res, next) => {
-  const collection = db.collection("blog");
-  await collection.deleteOne({_id:new ObjectId(req.body.id) });
+  const collection = client.db(documents).collection("blog");
+  const result = await collection.deleteOne({_id:new ObjectId(req.body.id) });
+  req.deletecount = result.deletedCount
   next();
 };
 
@@ -32,13 +39,13 @@ router.delete("/", (req, res) => {
     res.status(200).json({
       status: 200,
       massage: "delete success",
+      deletecount: req.deletecount,
       item:id
     });
   } else {
     res.status(400).json({
       status: 400,
       massage: "delete failed",
-      
     });
   }
 });

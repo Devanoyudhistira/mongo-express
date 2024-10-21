@@ -1,16 +1,20 @@
-import { MongoClient } from "mongodb";
+import { MongoClient,ServerApiVersion  } from "mongodb";
 import "dotenv/config";
 import express from "express";
 const router = express.Router();
 const mongourl = process.env.mongourl;
 const documents = process.env.documents;
-const client = new MongoClient(mongourl);
-let db;
+const client = new MongoClient(mongourl,{
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 
 const connection = async () => {
   try {
     await client.connect();
-    db = client.db(documents);
   } catch (error) {
     console.log(error + "failed");
   }
@@ -18,7 +22,7 @@ const connection = async () => {
 connection()
 
 const postblog = async (req, res, next) => {
-  const collection = db.collection("blog");
+  const collection = client.db(documents).collection("blog");
   await collection.insertOne(req.body);
   next();
 };

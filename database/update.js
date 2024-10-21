@@ -1,16 +1,21 @@
 import express from "express";
 const update = express.Router();
 import "dotenv/config";
-import { MongoClient, ObjectId } from "mongodb";
-let db;
+import { MongoClient, ObjectId ,ServerApiVersion} from "mongodb";
 const mongourl = process.env.mongourl;
 const documents = process.env.documents;
-const client = new MongoClient(mongourl);
+const client = new MongoClient(mongourl,{
+  serverApi:{
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 
 const connection = async () => {
   try {
     await client.connect();
-    db = client.db(documents);
+    client.db(documents);
     console.log("connected success");
   } catch (error) {
     console.log(error + "failed");
@@ -21,7 +26,7 @@ connection();
 
 update.put("/", async (req, res) => {
   const { target, change } = req.body;
-  const collection = db.collection("blog");
+  const collection = client.db(documents).collection("blog");
   const updatedocument = await collection.updateOne(
     { _id:new ObjectId(target) },
     { $set: { "contents.blog": change } }
