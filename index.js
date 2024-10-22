@@ -6,7 +6,7 @@ import finddata from "./database/single.js";
 import update from "./database/update.js";
 import "dotenv/config";
 const app = express();
-const port = process.env.port || 3000;
+const port = process.env.port || 3500;
 import cors from "cors";
 
 app.use(cors({ origin: "http://localhost:5173" }));

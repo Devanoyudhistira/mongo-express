@@ -3,8 +3,8 @@ const router = express.Router();
 import "dotenv/config";
 import { MongoClient,ObjectId,ServerApiVersion } from "mongodb";
 let db;
-const mongourl = process.env.mongourl || process.env.MONGODB_URI;
-const documents = process.env.documents;
+const mongourl =  process.env.MONGODB_URI || process.env.MONGODB_URL_BLOG || process.env.mongourl;
+const documents = process.env.documents || "production"
 const client = new MongoClient(mongourl,{
   serverApi:{
     version: ServerApiVersion.v1,
