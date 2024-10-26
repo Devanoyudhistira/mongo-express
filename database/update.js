@@ -27,11 +27,15 @@ connection();
 update.put("/", async (req, res) => {
   const { target, change } = req.body;
   const collection = client.db(documents).collection("blog");
+  if(!target || !change){
+    res.status(404).json({"massage":"undefined variable"})
+  }
   const updatedocument = await collection.updateOne(
     { _id:new ObjectId(target) },
     { $set: { "contents.blog": change } }
   );
-  res.status(201).send({hasil:updatedocument.modifiedCount});
+  res.status(201).send({hasil:updatedocument.modifiedCount,editres:change});
 });
+
 
 export default update

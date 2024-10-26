@@ -25,6 +25,9 @@ app.use((req,res) => res.status(404).json({
 "status-code":404,
 "massage":"wrong http"
 }))
+update.use((req,res) => {
+  res.status(403).json({"massage":"method not allowed","status":403})
+})
 
 app.listen(port, () => console.log(`http://localhost:${port}`));
 
